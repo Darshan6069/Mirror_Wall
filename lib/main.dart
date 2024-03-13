@@ -49,12 +49,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final webKey = GlobalKey();
   TextEditingController searchController = TextEditingController();
-  InAppWebViewController? webViewController;
   PullToRefreshController? refreshController;
 
 
 
-  SearchEngine? Engine = SearchEngine.Google;
+
   int? index = 0;
 
   @override
@@ -73,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Color(0xff6054c1),
         ),
         onRefresh: () async {
-          await webViewController!.reload();
+          await providerVar.webViewController!.reload();
         });
   }
 
@@ -116,9 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       itemBuilder: (context, index) {
                                         return ListTile(
                                           onTap: () {
-                                            setState(() {
-                                              webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('${providerVar.bookMarkList[index].bookmark}')));
-                                            });
+                                           providerVar.bookMarkUrl(index);
                                             Navigator.of(context).pop();
                                           },
                                           title: Text(
@@ -169,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       context: context,
                       builder: (context) {
                         return StatefulBuilder(
+
                           builder: (context, setState) {
                             return AlertDialog(
                               title: Center(child: Text('Search Engine')),
@@ -182,13 +180,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                       children: [
                                         RadioListTile(
                                             value: SearchEngine.Google,
-                                            groupValue: Engine,
+                                            groupValue:providerVar.Engine,
                                             onChanged: (value) {
-                                              setState(() {
-                                                Engine = value;
-                                              });
+                                              providerVar.changeEngine(value);
                                               Navigator.of(context).pop();
-                                              webViewController!.loadUrl(
+                                              providerVar.webViewController!.loadUrl(
                                                   urlRequest: URLRequest(
                                                       url: WebUri(
                                                           'https://www.google.com/')));
@@ -196,13 +192,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                             title: Text('Google')),
                                         RadioListTile(
                                             value: SearchEngine.Yahoo,
-                                            groupValue: Engine,
+                                            groupValue: providerVar.Engine,
                                             onChanged: (value) {
-                                              setState(() {
-                                                Engine = value;
-                                              });
+                                              providerVar.changeEngine(value);
                                               Navigator.of(context).pop();
-                                              webViewController!.loadUrl(
+                                              providerVar.webViewController!.loadUrl(
                                                   urlRequest: URLRequest(
                                                       url: WebUri(
                                                           'https://in.search.yahoo.com/')));
@@ -210,13 +204,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                             title: Text('Yahoo')),
                                         RadioListTile(
                                             value: SearchEngine.Bing,
-                                            groupValue: Engine,
+                                            groupValue: providerVar.Engine,
                                             onChanged: (value) {
-                                              setState(() {
-                                                Engine = value;
-                                              });
+                                              providerVar.changeEngine(value);
                                               Navigator.of(context).pop();
-                                              webViewController!.loadUrl(
+                                              providerVar.webViewController!.loadUrl(
                                                   urlRequest: URLRequest(
                                                       url: WebUri(
                                                           'https://www.bing.com/')));
@@ -224,12 +216,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                             title: Text('Bing')),
                                         RadioListTile(
                                             value: SearchEngine.DuckDuckGo,
-                                            groupValue: Engine,
+                                            groupValue: providerVar.Engine,
                                             onChanged: (value) {
-                                              setState(() {
-                                                Engine = value;
-                                              });
-                                              webViewController!.loadUrl(
+                                              providerVar.changeEngine(value);
+                                              providerVar.webViewController!.loadUrl(
                                                   urlRequest: URLRequest(
                                                       url: WebUri(
                                                           'https://duckduckgo.com/')));
@@ -263,22 +253,22 @@ class _MyHomePageState extends State<MyHomePage> {
               initialUrlRequest:
                   URLRequest(url: WebUri('https://www.google.com')),
               onWebViewCreated: (value) {
-                webViewController = value;
+                providerVar.webViewController = value;
               },
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
-              decoration: InputDecoration(suffixIcon: IconButton(onPressed: (){ webViewController!.loadUrl(
+              decoration: InputDecoration(suffixIcon: IconButton(onPressed: (){ providerVar.webViewController!.loadUrl(
                   urlRequest: URLRequest(
-                      url: (Engine == SearchEngine.Google)
+                      url: (providerVar.Engine == SearchEngine.Google)
                           ? WebUri(
                           'https://www.google.com/search?q=${searchController.text}')
-                          : (Engine == SearchEngine.Yahoo)
+                          : (providerVar.Engine == SearchEngine.Yahoo)
                           ? WebUri(
                           'https://in.search.yahoo.com/search?q=${searchController.text}')
-                          : (Engine == SearchEngine.Bing)
+                          : (providerVar.Engine == SearchEngine.Bing)
                           ? WebUri(
                           'https://www.bing.com/search?q=${searchController.text}')
                           : WebUri(
@@ -286,15 +276,15 @@ class _MyHomePageState extends State<MyHomePage> {
               searchController.clear();},icon: Icon(Icons.search)),hintText: 'Search or type web address',border: OutlineInputBorder(borderSide: BorderSide(style: BorderStyle.solid,width: 2))),
               controller: searchController,
               onFieldSubmitted: (value) {
-                webViewController!.loadUrl(
+                providerVar.webViewController!.loadUrl(
                     urlRequest: URLRequest(
-                        url: (Engine == SearchEngine.Google)
+                        url: (providerVar.Engine == SearchEngine.Google)
                             ? WebUri(
                                 'https://www.google.com/search?q=${searchController.text}')
-                            : (Engine == SearchEngine.Yahoo)
+                            : (providerVar.Engine == SearchEngine.Yahoo)
                                 ? WebUri(
                                     'https://in.search.yahoo.com/search?q=${searchController.text}')
-                                : (Engine == SearchEngine.Bing)
+                                : (providerVar.Engine == SearchEngine.Bing)
                                     ? WebUri(
                                         'https://www.bing.com/search?q=${searchController.text}')
                                     : WebUri(
@@ -308,35 +298,35 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               IconButton(
                   onPressed: () {
-                    (Engine == SearchEngine.Google)?webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://www.google.com/')))
-                    :(Engine == SearchEngine.Yahoo)?webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://in.search.yahoo.com/')))
-                     : (Engine == SearchEngine.Bing)?webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://www.bing.com/')))
-                        :webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://duckduckgo.com/')));
+                    (providerVar.Engine == SearchEngine.Google)?providerVar.webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://www.google.com/')))
+                    :(providerVar.Engine == SearchEngine.Yahoo)?providerVar.webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://in.search.yahoo.com/')))
+                     : (providerVar.Engine == SearchEngine.Bing)?providerVar.webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://www.bing.com/')))
+                        :providerVar.webViewController!.loadUrl(urlRequest: URLRequest(url: WebUri('https://duckduckgo.com/')));
                   },
                   icon: Icon(Icons.home,size: 27,)),
               IconButton(
                   onPressed: () async {
-                    if (webViewController != null) {
+                    if (providerVar.webViewController != null) {
                       BookmarkModel DATA = BookmarkModel(
-                          bookmarktitle: await webViewController!.getTitle(),
-                          bookmark: await webViewController!.getUrl());
+                          bookmarktitle: await providerVar.webViewController!.getTitle(),
+                          bookmark: await providerVar.webViewController!.getUrl());
                       providerVar.bookMarkADD(DATA);
                     }
                   },
                   icon: Icon(Icons.bookmark_add_outlined,size: 27)),
               IconButton(
                   onPressed: () {
-                    webViewController!.goBack();
+                    providerVar.webViewController!.goBack();
                   },
                   icon: Icon(Icons.arrow_back_ios_new,size: 27)),
               IconButton(
                   onPressed: () {
-                    webViewController!.reload();
+                    providerVar.webViewController!.reload();
                   },
                   icon: Icon(Icons.refresh,size: 27)),
               IconButton(
                   onPressed: () {
-                    webViewController!.goForward();
+                    providerVar.webViewController!.goForward();
                   },
                   icon: Icon(Icons.arrow_forward_ios,size: 27)),
             ],
